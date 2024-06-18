@@ -26,7 +26,7 @@ const productSchema = new mongoose.Schema({
 });
 
 const Product = mongoose.model("Product", productSchema);
-
+const Categories = mongoose.model("Categories", productSchema);
 // Rutas
 app.get("/api/products", async (req, res) => {
   try {
@@ -51,7 +51,7 @@ app.post("/api/products", async (req, res) => {
 
 app.get("/api/categories", async (req, res) => {
   try {
-    const categories = await Product.find().distinct("categoria");
+    const categories = await Categories.find();
     res.status(200).send(categories);
   } catch (err) {
     res.status(500).json({ message: err.message });
