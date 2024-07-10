@@ -58,6 +58,46 @@ app.get("/api/categories", async (req, res) => {
   }
 });
 
+app.get("/api/user/:id", async (req, res) => {
+  try {
+    // Extract the token from the Authorization header
+    const token = req.headers.authorization?.split(" ")[1]; // Authorization: Bearer TOKEN
+    if (!token) {
+      return res
+        .status(401)
+        .json({ message: "Access denied. No token provided." });
+    }
+
+    // Verify the token
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (!decoded) {
+      return res.status(401).json({ message: "Invalid token." });
+    }
+
+    if (decoded.userId !== req.params.id) {
+      return res.status(403).json({ message: "Access denied." });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    res.status(200).send({
+      name: user.name,
+      email: user.email,
+      id: user._id,
+      accessToken: token,
+    });
+  } catch (err) {
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Invalid token." });
+    } else if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token expired." });
+    }
+    res.status(500).json({ message: err.message });
+  }
+});
+
 //post
 app.post("/api/products", async (req, res) => {
   const product = new Product({
@@ -119,8 +159,9 @@ app.post("/api/users/login", async (req, res) => {
     user: {
       name: user.name,
       email: user.email,
+      id: user._id,
+      accessToken: token,
     },
-    accessToken: token,
   });
 });
 
