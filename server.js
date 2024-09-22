@@ -16,7 +16,9 @@ app.use(bodyParser.json());
 // Conexión a MongoDB
 mongoose
   .connect("mongodb://localhost:27017/myapidb", {})
-  .then(() => console.log("Conectado a MongoDB..."))
+  .then(() => {console.log("Conectado a MongoDB...")
+   // migrateCategories();
+  })
   .catch((err) => console.error("No se pudo conectar a MongoDB...", err));
 
 //products
@@ -38,6 +40,26 @@ const userSchema = new mongoose.Schema({
 const Product = mongoose.model("Product", productSchema);
 const Categories = mongoose.model("Categories", productSchema);
 const User = mongoose.model("users", userSchema);
+
+// //Migrate data of one collection to other
+// async function migrateCategories() {
+
+//   try{
+
+//     const categories = await Product.distinct("categoria");
+
+//     const categoryDocs = categories.map((categoria) => ({categoria}));
+
+//     await Categories.insertMany(categoryDocs, {ordered: false});
+
+//     console.log("Categories migrated successfully");
+
+
+//   }catch(err){
+//     console.error(err);
+//   }
+
+// }
 
 // Rutas
 app.get("/api/products", async (req, res) => {
